@@ -45,6 +45,13 @@ public class MainActivity extends AppCompatActivity {
 
     private Random rnd;
 
+    private final static String KEY_PROBLEM = "MainActivity.problem";
+    private final static String KEY_GUESS = "MainActivity.guess";
+    private final static String KEY_POS = "MainActivity.pos";
+    private final static String KEY_NTRIAL = "MainActivity.ntrial";
+    private final static String KEY_GAME_STARTED = "MainActivity.game_started";
+    private final static String KEY_STATUS = "MainActivity.status";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +75,36 @@ public class MainActivity extends AppCompatActivity {
         rnd = new Random();
         problem = new int[N];
         guess = new int[N];
+
+        if(savedInstanceState != null){
+            game_started = savedInstanceState.getBoolean(KEY_GAME_STARTED);
+            guess = savedInstanceState.getIntArray(KEY_GUESS);
+
+            if(guess != null) {
+                for (int i = 0; i < N; i++) {
+                    if (guess[i] != 0) {
+                        guessDigits[i].setText(getString(R.string.guess_digit, guess[i]));
+                    } else {
+                        guessDigits[i].setText(R.string.guess_init_letter);
+                    }
+                }
+            }
+
+            status = savedInstanceState.getStringArrayList(KEY_STATUS);
+            if(status != null) statusAdapter = new ArrayAdapter<>(this, R.layout.status_item, status);
+            statusView.setAdapter(statusAdapter);
+            statusView.smoothScrollToPosition(statusAdapter.getCount() - 1);
+
+            if(game_started){
+                problem = savedInstanceState.getIntArray(KEY_PROBLEM);
+                pos = savedInstanceState.getInt(KEY_POS);
+                ntrial = savedInstanceState.getInt(KEY_NTRIAL);
+
+                ctrlButton.setText(R.string.ctrl_give_up);
+                messageView.setText(getString(R.string.message_enter));
+                return;
+            }
+        }
         initGame();
     }
 
@@ -191,4 +228,15 @@ public class MainActivity extends AppCompatActivity {
         return v;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_NTRIAL,ntrial);
+        outState.putIntArray(KEY_PROBLEM,problem);
+        outState.putIntArray(KEY_GUESS,guess);
+        outState.putInt(KEY_POS,pos);
+        outState.putBoolean(KEY_GAME_STARTED,game_started);
+        outState.putStringArrayList(KEY_STATUS,status);
+
+    }
 }
